@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -6,7 +7,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private GameObject tile_Prefab;
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private bool isGround;
+    [SerializeField] public bool isGround;
     [SerializeField] private bool keyCollected = false;
     [SerializeField] private Transform legs;
     [SerializeField] private float groundCheckRadius;
@@ -15,15 +16,18 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private TileBase floorTile;
     [SerializeField] private float playerSpeedMultiplier;
     [SerializeField] private float playerMovementX;
+    [SerializeField] private LevelManager thisLevelManager;
+    [SerializeField] private ParticleSystem keyDestroyed_Effect;
+
+    [Header("Audio")]
     [SerializeField] private Rigidbody2D playerRigidBody2D;
     [SerializeField] private AudioSource player_AudioSource;
     [SerializeField] private AudioSource player_AudioSourceNoPitch;
     [SerializeField] private AudioClip tilePlacingAudioClip;
     [SerializeField] private AudioClip playerJump_AudioClip;
     [SerializeField] private AudioClip keyCollected_AudioClip;
-    [SerializeField] private LevelManager thisLevelManager;
-    [SerializeField] private ParticleSystem keyDestroyed_Effect;
     RaycastHit hitInfo;
+    public Transform tileTransform;
 
     private void Start()
     {
@@ -80,6 +84,22 @@ public class PlayerMovement : MonoBehaviour
             thisLevelManager.PlayerCollectedKey();
             keyDestroyed_Effect.Play();
             Destroy(collision.gameObject);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Dying Tile"))
+        {
+            tileTransform = collision.transform;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Dying Tile"))
+        {
+            tileTransform = null;
         }
     }
 

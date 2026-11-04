@@ -15,6 +15,7 @@ public partial class LevelManager : MonoBehaviour
     public class LevelUI
     {
         [Header("Key")]
+        public GameObject keyParent;
         public float keyTimer;
         public Image key;
         [Header("Tiles")]
@@ -84,10 +85,28 @@ public partial class LevelManager : MonoBehaviour
             float clampValue = Mathf.Clamp01(elapsedTime / levelUI.keyTimer);
             float lerpValue = Mathf.Lerp(1, 0, clampValue);
             levelUI.key.fillAmount = lerpValue;
+            if(lerpValue < 0.35f && levelUI.key.color != Color.red)
+            {
+                StartCoroutine(KeyWarningVisual());
+            }
             yield return null;
         }
         levelUI.key.fillAmount = 0;
         StartCoroutine(KeyTileDestroy());
+    }
+
+    IEnumerator KeyWarningVisual()
+    {
+        float elapsedTime = 0;
+
+        while(elapsedTime < 1)
+        {
+            elapsedTime += Time.deltaTime;
+            float clampValue = Mathf.Clamp01(elapsedTime / 1);
+            Color lerpValue = Color.Lerp(levelUI.key.color, Color.red, clampValue);
+            levelUI.key.color = lerpValue;
+            yield return null;
+        }
     }
 
     IEnumerator KeyTileDestroy()
@@ -99,6 +118,8 @@ public partial class LevelManager : MonoBehaviour
 
     public void PlayerCollectedKey()
     {
+        StopCoroutine(KeyTileDestructionTimer());
+        levelUI.keyParent.SetActive(false);
         thisLevelDoor.UnlockDoor();
     }
 

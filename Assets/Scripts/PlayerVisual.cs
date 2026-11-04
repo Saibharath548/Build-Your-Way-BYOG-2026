@@ -3,9 +3,11 @@ using UnityEngine;
 
 public class PlayerVisual : MonoBehaviour
 {
+    [SerializeField] private PlayerMovement player;
+
     [SerializeField] private Animator player_Animator;
     [SerializeField] private SpriteRenderer player_SpriteRenderer;
-
+    [SerializeField] private GameObject emote;
     [SerializeField] private Rigidbody2D player_RigidBody2D;
     [SerializeField] private float animationLerpDuration;
 
@@ -26,18 +28,45 @@ public class PlayerVisual : MonoBehaviour
             StartCoroutine(AnimationLerp(animationLerpDuration, "Movement Animation Value", -1));
         }
         //else if(Mathf.Floor(player_RigidBody2D.linearVelocity.x) == 0)
-        else if(playerMovementX == 0)
+        else if (playerMovementX == 0)
         {
             StartCoroutine(AnimationLerp(animationLerpDuration, "Movement Animation Value", 0));
         }
 
-        if(Mathf.Round(player_RigidBody2D.linearVelocity.y) > 0)
+        if (!player.isGround)
         {
             player_Animator.SetBool("Jump", true);
+            if (Mathf.Round(player_RigidBody2D.linearVelocity.y) > 0)
+            {
+                player_Animator.SetFloat("Vertical Velocity", 1);
+            }
+            else
+            {
+                player_Animator.SetFloat("Vertical Velocity", -1);
+            }
         }
         else
         {
+            player_Animator.SetFloat("Vertical Velocity", 0);
             player_Animator.SetBool("Jump", false);
+        }
+        if (player.isGround && player.tileTransform != null)
+        {
+            if (player.tileTransform.localScale.x > 0.5f)
+            {
+                emote.SetActive(true);
+                player_Animator.SetBool("Sus", true);
+            }
+            else
+            {
+                emote.SetActive(false);
+                player_Animator.SetBool("Sus", false);
+            }
+        }
+        else
+        {
+            emote.SetActive(false);
+            player_Animator.SetBool("Sus", false);
         }
     }
 
